@@ -1,0 +1,21 @@
+[tool.poetry]
+name = "py-landlock"
+version = "0.1.0"
+description = "Linux LandLock binding for Python"
+authors = ["Manjusaka <me@manjusaka.me>"]
+license = "MIT"
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.9"
+pydantic = "^2.6.4"
+
+[tool.poetry.group.dev.dependencies]
+black = "^21.4b2"
+
+[tool.poetry.group.test.dependencies]
+pytest = "^6.2.4"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
