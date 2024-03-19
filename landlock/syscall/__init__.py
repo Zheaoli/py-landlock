@@ -6,6 +6,8 @@ from landlock.syscall.exceptions import LandLockSyscallException
 
 RULESET_ATTR_SIZE = 16
 
+CREATE_RULESET_VERSION = 1
+
 
 class AccessFs(IntEnum):
     AccessFSExecute = 1 << 0
@@ -61,7 +63,8 @@ __SYS_LANDLOCK_RESTRICT_SELF = 446
 __CREATE_RULESET_BINDING = ctypes.CDLL(None).syscall
 __CREATE_RULESET_BINDING.restype = ctypes.c_int
 __CREATE_RULESET_BINDING.argtypes = [
-    ctypes.pointer(RulesetAttr),
+    ctypes.c_uint,
+    ctypes.POINTER(RulesetAttr),
     ctypes.c_uint,
     ctypes.c_uint,
 ]
@@ -72,6 +75,7 @@ __CREATE_RULESET_SYSCALL = partial(
 __ADD_RULE_BINDING = ctypes.CDLL(None).syscall
 __ADD_RULE_BINDING.restype = ctypes.c_int
 __ADD_RULE_BINDING.argtypes = [
+    ctypes.c_uint,
     ctypes.c_int,
     ctypes.c_uint,
     ctypes.c_void_p,
@@ -81,12 +85,19 @@ __ADD_RULE_SYSCALL = partial(__ADD_RULE_BINDING, __SYS_LANDLOCK_ADD_RULE)
 
 __RESTRICT_SELF_BINDING = ctypes.CDLL(None).syscall
 __RESTRICT_SELF_BINDING.restype = ctypes.c_int
-__RESTRICT_SELF_BINDING.argtypes = [ctypes.c_int, ctypes.c_uint]
+__RESTRICT_SELF_BINDING.argtypes = [ctypes.c_uint, ctypes.c_int, ctypes.c_uint]
 __RESTRICT_SELF_SYSCALL = partial(__RESTRICT_SELF_BINDING, __SYS_LANDLOCK_RESTRICT_SELF)
 
 
 def create_ruleset(attr: RulesetAttr, flags: int) -> int:
     result = __CREATE_RULESET_SYSCALL(ctypes.byref(attr), RULESET_ATTR_SIZE, flags)
+    if result < 0:
+        raise LandLockSyscallException(ctypes.get_errno())
+    return result
+
+
+def get_abi_version() -> int:
+    result = __CREATE_RULESET_SYSCALL(None, 0, CREATE_RULESET_VERSION)
     if result < 0:
         raise LandLockSyscallException(ctypes.get_errno())
     return result
