@@ -11,7 +11,7 @@ python = "^3.9"
 pydantic = "^2.6.4"
 
 [tool.poetry.group.dev.dependencies]
-black = "^21.4b2"
+black = "^24.3.0"
 
 [tool.poetry.group.test.dependencies]
 pytest = "^6.2.4"

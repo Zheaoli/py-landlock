@@ -60,12 +60,23 @@ __SYS_LANDLOCK_RESTRICT_SELF = 446
 
 __CREATE_RULESET_BINDING = ctypes.CDLL(None).syscall
 __CREATE_RULESET_BINDING.restype = ctypes.c_int
-__CREATE_RULESET_BINDING.argtypes = [ctypes.pointer(RulesetAttr), ctypes.c_uint, ctypes.c_uint]
-__CREATE_RULESET_SYSCALL = partial(__CREATE_RULESET_BINDING, __SYS_LANDLOCK_CREATE_RULESET)
+__CREATE_RULESET_BINDING.argtypes = [
+    ctypes.pointer(RulesetAttr),
+    ctypes.c_uint,
+    ctypes.c_uint,
+]
+__CREATE_RULESET_SYSCALL = partial(
+    __CREATE_RULESET_BINDING, __SYS_LANDLOCK_CREATE_RULESET
+)
 
 __ADD_RULE_BINDING = ctypes.CDLL(None).syscall
 __ADD_RULE_BINDING.restype = ctypes.c_int
-__ADD_RULE_BINDING.argtypes = [ctypes.c_int, ctypes.c_uint, ctypes.c_void_p, ctypes.c_uint]
+__ADD_RULE_BINDING.argtypes = [
+    ctypes.c_int,
+    ctypes.c_uint,
+    ctypes.c_void_p,
+    ctypes.c_uint,
+]
 __ADD_RULE_SYSCALL = partial(__ADD_RULE_BINDING, __SYS_LANDLOCK_ADD_RULE)
 
 __RESTRICT_SELF_BINDING = ctypes.CDLL(None).syscall
@@ -82,13 +93,17 @@ def create_ruleset(attr: RulesetAttr, flags: int) -> int:
 
 
 def create_path_beneath_rule(ruleset_fd: int, attr: PathBeneathAttr, flags: int):
-    result = __ADD_RULE_SYSCALL(ruleset_fd, __RULE_TYPE_PATH_BENEATH, ctypes.byref(attr), flags)
+    result = __ADD_RULE_SYSCALL(
+        ruleset_fd, __RULE_TYPE_PATH_BENEATH, ctypes.byref(attr), flags
+    )
     if result < 0:
         raise LandLockSyscallException(ctypes.get_errno())
 
 
 def create_net_service_rule(ruleset_fd: int, attr: NetServiceAttr, flags: int):
-    result = __ADD_RULE_SYSCALL(ruleset_fd, __RULE_TYPE_NET_SERVICE, ctypes.byref(attr), flags)
+    result = __ADD_RULE_SYSCALL(
+        ruleset_fd, __RULE_TYPE_NET_SERVICE, ctypes.byref(attr), flags
+    )
     if result < 0:
         raise LandLockSyscallException(ctypes.get_errno())
 
