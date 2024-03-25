@@ -39,10 +39,10 @@ class AccessFSSet(int):
         return self & other == self
 
     def intersection(self, other: "AccessFSSet") -> "AccessFSSet":
-        return self & other
+        return AccessFSSet(self & other)
 
     def union(self, other: "AccessFSSet") -> "AccessFSSet":
-        return self | other
+        return AccessFSSet(self | other)
 
     def is_empty(self) -> bool:
         return self == 0

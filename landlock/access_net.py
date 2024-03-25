@@ -25,10 +25,10 @@ class AccessNetSet(int):
         return self & other == self
 
     def intersection(self, other: "AccessNetSet") -> "AccessNetSet":
-        return self & other
+        return AccessNetSet(self & other)
 
     def union(self, other: "AccessNetSet") -> "AccessNetSet":
-        return self | other
+        return AccessNetSet(self | other)
 
     def is_empty(self) -> bool:
         return self == 0
