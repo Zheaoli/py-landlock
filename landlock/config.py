@@ -7,17 +7,17 @@ from landlock.abi_versions import _INDEX, ABIVersion
 
 from dataclasses import dataclass
 
-_ACCESS_FILE = AccessFSSet(
+ACCESS_FILE = AccessFSSet(
     syscall.AccessFs.AccessFSExecute
     | syscall.AccessFs.AccessFSWriteFile
     | syscall.AccessFs.AccessFSReadFile
 )
-_ACCESS_FS_READ = AccessFSSet(
+ACCESS_FS_READ = AccessFSSet(
     syscall.AccessFs.AccessFSExecute
     | syscall.AccessFs.AccessFSReadFile
     | syscall.AccessFs.AccessFSReadDir
 )
-_ACCESS_FS_WRITE = AccessFSSet(
+ACCESS_FS_WRITE = AccessFSSet(
     syscall.AccessFs.AccessFSWriteFile
     | syscall.AccessFs.AccessFSRemoveDir
     | syscall.AccessFs.AccessFSRemoveFile
@@ -31,7 +31,7 @@ _ACCESS_FS_WRITE = AccessFSSet(
     | syscall.AccessFs.AccessFSTruncate
 )
 
-_ACCESS_FS_READ_WRITE = _ACCESS_FS_READ.union(_ACCESS_FS_WRITE)
+ACCESS_FS_READ_WRITE = ACCESS_FS_READ.union(ACCESS_FS_WRITE)
 
 
 @dataclass
@@ -68,6 +68,7 @@ class Config:
             net_set_description = "all"
         best_effort = "" if not self.best_effort else " (best effort)"
         version = "V???" if abi.version < 0 else f"V{abi.version}"
-        return (f"{'{'} Landlock {version}; FS: {fs_set_description}; "
-                f"Net:{net_set_description}; BestEffort:{best_effort} {'}'}")
-
+        return (
+            f"{'{'} Landlock {version}; FS: {fs_set_description}; "
+            f"Net:{net_set_description}; BestEffort:{best_effort} {'}'}"
+        )

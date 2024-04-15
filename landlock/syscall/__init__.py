@@ -88,6 +88,11 @@ __RESTRICT_SELF_BINDING.restype = ctypes.c_int
 __RESTRICT_SELF_BINDING.argtypes = [ctypes.c_uint, ctypes.c_int, ctypes.c_uint]
 __RESTRICT_SELF_SYSCALL = partial(__RESTRICT_SELF_BINDING, __SYS_LANDLOCK_RESTRICT_SELF)
 
+__PRCTL_BINDING = ctypes.CDLL(None).syscall
+__PRCTL_BINDING.restype = ctypes.c_int
+__PRCTL_BINDING.argtypes = [ctypes.c_int, ctypes.c_int, ctypes.c_int, ctypes.c_int, ctypes.c_int, ctypes.c_int]
+__PRCTL_SYSCALL = partial(__PRCTL_BINDING, 157)
+
 
 def create_ruleset(attr: RulesetAttr, flags: int) -> int:
     result = __CREATE_RULESET_SYSCALL(ctypes.byref(attr), RULESET_ATTR_SIZE, flags)
@@ -119,7 +124,27 @@ def create_net_service_rule(ruleset_fd: int, attr: NetServiceAttr, flags: int):
         raise LandLockSyscallException(ctypes.get_errno())
 
 
+def add_rule(ruleset_fd: int, rule_type: int, attr: PathBeneathAttr | NetServiceAttr, flags: int):
+    result = __ADD_RULE_SYSCALL(ruleset_fd, rule_type, ctypes.byref(attr), flags)
+    if result < 0:
+        raise LandLockSyscallException(ctypes.get_errno())
+
+
 def restrict_self(ruleset_fd: int, flags: int):
     result = __RESTRICT_SELF_SYSCALL(ruleset_fd, flags)
     if result < 0:
         raise LandLockSyscallException(ctypes.get_errno())
+
+
+def all_threads_prctl(option: int):
+    result = __PRCTL_SYSCALL(option, 0, 0, 0, 0, 0)
+    if result < 0:
+        raise LandLockSyscallException(ctypes.get_errno())
+
+
+def add_path_beneath_rule(ruleset_fd: int, attr: PathBeneathAttr, flags: int):
+    add_rule(ruleset_fd, __RULE_TYPE_PATH_BENEATH, attr, flags)
+
+
+def add_net_service_rule(ruleset_fd: int, attr: NetServiceAttr, flags: int):
+    add_rule(ruleset_fd, __RULE_TYPE_NET_SERVICE, attr, flags)
