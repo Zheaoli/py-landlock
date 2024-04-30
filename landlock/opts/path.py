@@ -1,12 +1,12 @@
 import os
 from contextlib import contextmanager
-from typing import Self, Iterable
 from dataclasses import dataclass
+from typing import Self, Iterable
 
 from landlock import syscall
 from landlock.access_sets.access_fs import AccessFSSet
-from landlock.opts.base import BaseRule
 from landlock.config import Config, ACCESS_FS_READ, ACCESS_FS_READ_WRITE, ACCESS_FILE
+from landlock.opts.base import BaseRule
 
 
 @contextmanager

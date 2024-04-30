@@ -2,6 +2,7 @@ from typing import Optional
 
 from landlock import syscall
 from landlock.abi_versions import ABIVersion, get_abi_info
+from landlock.access_sets.access_net import AccessNetSet
 from landlock.config import Config
 from landlock.exceptions import LandLockUncompilableRuleException, LandLockABIVersionMissingException
 from landlock.opts.base import BaseRule
@@ -39,3 +40,13 @@ def restrict(config: Config, rules: list[BaseRule]):
         rule.add_to_rule_set(fd, config)
     syscall.all_threads_prctl(0x26, 1, 0, 0, 0)
     syscall.restrict_self(fd, 0)
+
+
+def restrict_path(config: Config, rules: list[BaseRule]):
+    config.handled_access_network = AccessNetSet(0)
+    restrict(config, rules)
+
+
+def restrict_net(config: Config, rules: list[BaseRule]):
+    config.handled_access_fs = AccessNetSet(0)
+    restrict(config, rules)

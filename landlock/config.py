@@ -1,11 +1,10 @@
+from dataclasses import dataclass
 from typing import Optional, Self
 
 from landlock import syscall
+from landlock.abi_versions import ABI_INDEX, ABIVersion
 from landlock.access_sets.access_fs import AccessFSSet
 from landlock.access_sets.access_net import AccessNetSet
-from landlock.abi_versions import _INDEX, ABIVersion
-
-from dataclasses import dataclass
 
 ACCESS_FILE = AccessFSSet(
     syscall.AccessFs.AccessFSExecute
@@ -51,9 +50,9 @@ class Config:
 
     def __str__(self) -> str:
         abi = ABIVersion(-1, AccessFSSet(0), AccessNetSet(0))
-        for i in range(len(_INDEX)):
-            if self.compatible_with_abi(_INDEX[i]):
-                abi = _INDEX[i]
+        for i in range(len(ABI_INDEX)):
+            if self.compatible_with_abi(ABI_INDEX[i]):
+                abi = ABI_INDEX[i]
         fs_set_description = str(self.handled_access_fs)
         if (
                 abi.support_access_fs == self.handled_access_fs
@@ -81,3 +80,17 @@ class Config:
             ),
             best_effort=self.best_effort,
         )
+
+
+def get_config_from_abi_version(abi: ABIVersion) -> "Config":
+    return Config(
+        handled_access_fs=abi.support_access_fs,
+        handled_access_network=abi.support_access_network,
+        best_effort=False,
+    )
+
+
+V1 = get_config_from_abi_version(ABI_INDEX[1])
+V2 = get_config_from_abi_version(ABI_INDEX[2])
+V3 = get_config_from_abi_version(ABI_INDEX[3])
+V4 = get_config_from_abi_version(ABI_INDEX[4])

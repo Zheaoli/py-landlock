@@ -15,10 +15,10 @@ class NetRule(BaseRule):
     def __str__(self):
         return f"ALLOW {self.access} on TCP port {self.port}"
 
-    def compatible_with_config(self, config: Config) -> bool:
+    def compatible_with_config(self, config: "Config") -> bool:
         return self.access.is_subset(config.handled_access_network)
 
-    def downgrade(self, config: Config) -> tuple[Self, bool]:
+    def downgrade(self, config: "Config") -> tuple[Self, bool]:
         return NetRule(
             access=self.access.intersection(config.handled_access_network),
             port=self.port

@@ -1,6 +1,6 @@
 import ctypes
-from functools import partial
 from enum import IntEnum
+from functools import partial
 
 from landlock.exceptions import LandLockSyscallException
 
