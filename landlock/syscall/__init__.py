@@ -2,7 +2,7 @@ import ctypes
 from functools import partial
 from enum import IntEnum
 
-from landlock.syscall.exceptions import LandLockSyscallException
+from landlock.exceptions import LandLockSyscallException
 
 RULESET_ATTR_SIZE = 16
 
@@ -136,8 +136,8 @@ def restrict_self(ruleset_fd: int, flags: int):
         raise LandLockSyscallException(ctypes.get_errno())
 
 
-def all_threads_prctl(option: int):
-    result = __PRCTL_SYSCALL(option, 0, 0, 0, 0, 0)
+def all_threads_prctl(option: int, arg1: int, arg2: int, arg3: int, arg4: int):
+    result = __PRCTL_SYSCALL(option, arg1, arg2, arg3, arg4)
     if result < 0:
         raise LandLockSyscallException(ctypes.get_errno())
 

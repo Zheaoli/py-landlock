@@ -23,4 +23,4 @@ _INDEX = [
 
 def get_abi_info() -> ABIVersion:
     version = syscall.get_abi_version()
-    return _INDEX[version]
+    return _INDEX[version] if version <= len(_INDEX) else _INDEX[-1]

@@ -5,7 +5,7 @@ from dataclasses import dataclass
 
 from landlock import syscall
 from landlock.access_sets.access_fs import AccessFSSet
-from landlock.opts.abstract import AbstractRule
+from landlock.opts.base import BaseRule
 from landlock.config import Config, ACCESS_FS_READ, ACCESS_FS_READ_WRITE, ACCESS_FILE
 
 
@@ -19,7 +19,7 @@ def os_open(path: str, flags: int) -> Iterable[int]:
 
 
 @dataclass
-class FsRule(AbstractRule):
+class FsRule(BaseRule):
     access_fs: AccessFSSet
     paths: list[str]
     enforce_subset: bool
@@ -47,32 +47,33 @@ class FsRule(AbstractRule):
     def __str__(self):
         return f"REQUIRED {self.access_fs} for paths {self.paths}"
 
-    def _compatible_with_config(self, config: Config) -> bool:
+    def compatible_with_config(self, config: Config) -> bool:
         temp = self.access_fs
         if not self.enforce_subset:
             temp = temp.intersection(AccessFSSet(syscall.AccessFs.AccessFSRefer))
         return temp.is_subset(config.handled_access_fs)
 
-    def _downgrade(self, config: Config) -> tuple[Self, bool]:
+    def downgrade(self, config: Config) -> tuple[Self, bool]:
         if self.has_refer(self.access_fs) and not self.has_refer(
                 config.handled_access_fs
         ):
             return FsRule(AccessFSSet(0), [], False, False), False
         return self._intersect_rights(config.handled_access_fs), True
 
-    def _add_to_rule_set(self, rule_set_fd: int, config: Config):
+    def add_to_rule_set(self, rule_set_fd: int, config: Config):
         effective_access_fs = self.access_fs
         if not self.enforce_subset:
             effective_access_fs = effective_access_fs.intersection(
                 AccessFSSet(syscall.AccessFs.AccessFSRefer)
             )
         for path in self.paths:
-            syscall.add(rule_set_fd, path, effective_access_fs, self.ignore_missing)
+            self.__add_path(rule_set_fd, path, effective_access_fs)
 
     @staticmethod
     def __add_path(rule_set_fd: int, path: str, access_fs: AccessFSSet):
         with os_open(path, os.O_PATH | os.O_CLOEXEC) as fd:
-            path_beaneath=P
+            path_beneath = syscall.PathBeneathAttr(allowed_access=int(access_fs), parent_fd=fd)
+            syscall.add_path_beneath_rule(rule_set_fd, path_beneath, 0)
 
 
 def path_access(access_fs: AccessFSSet, paths: list[str]) -> FsRule:

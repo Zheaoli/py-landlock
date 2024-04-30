@@ -1,4 +1,4 @@
-from typing import Optional
+from typing import Optional, Self
 
 from landlock import syscall
 from landlock.access_sets.access_fs import AccessFSSet
@@ -56,14 +56,14 @@ class Config:
                 abi = _INDEX[i]
         fs_set_description = str(self.handled_access_fs)
         if (
-            abi.support_access_fs == self.handled_access_fs
-            and not self.handled_access_fs.is_empty()
+                abi.support_access_fs == self.handled_access_fs
+                and not self.handled_access_fs.is_empty()
         ):
             fs_set_description = "all"
         net_set_description = str(self.handled_access_network)
         if (
-            abi.support_access_network == self.handled_access_network
-            and not self.handled_access_network.is_empty()
+                abi.support_access_network == self.handled_access_network
+                and not self.handled_access_network.is_empty()
         ):
             net_set_description = "all"
         best_effort = "" if not self.best_effort else " (best effort)"
@@ -71,4 +71,13 @@ class Config:
         return (
             f"{'{'} Landlock {version}; FS: {fs_set_description}; "
             f"Net:{net_set_description}; BestEffort:{best_effort} {'}'}"
+        )
+
+    def restrict_to(self, abi: ABIVersion) -> Self:
+        return Config(
+            handled_access_fs=self.handled_access_fs.intersection(abi.support_access_fs),
+            handled_access_network=self.handled_access_network.intersection(
+                abi.support_access_network
+            ),
+            best_effort=self.best_effort,
         )
