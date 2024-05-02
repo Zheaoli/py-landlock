@@ -2,7 +2,7 @@ import ctypes
 from enum import IntEnum
 from functools import partial
 
-from landlock.exceptions import LandLockSyscallException
+from landlock.syscall.exceptions import LandLockSyscallException
 
 RULESET_ATTR_SIZE = 16
 
@@ -125,7 +125,7 @@ def create_net_service_rule(ruleset_fd: int, attr: NetServiceAttr, flags: int):
 
 
 def add_rule(ruleset_fd: int, rule_type: int, attr: PathBeneathAttr | NetServiceAttr, flags: int):
-    result = __ADD_RULE_SYSCALL(ruleset_fd, rule_type, ctypes.byref(attr), flags)
+    result = __ADD_RULE_SYSCALL(ruleset_fd, rule_type, ctypes.pointer(attr), flags)
     if result < 0:
         raise LandLockSyscallException(ctypes.get_errno())
 

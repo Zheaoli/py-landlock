@@ -2,6 +2,7 @@ from typing import Optional
 
 from landlock import syscall
 from landlock.abi_versions import ABIVersion, get_abi_info
+from landlock.access_sets.access_fs import AccessFSSet
 from landlock.access_sets.access_net import AccessNetSet
 from landlock.config import Config
 from landlock.exceptions import LandLockUncompilableRuleException, LandLockABIVersionMissingException
@@ -33,8 +34,9 @@ def restrict(config: Config, rules: list[BaseRule]):
         raise LandLockABIVersionMissingException(abi_version.version)
     if config.handled_access_fs.is_empty() and config.handled_access_network.is_empty():
         return
-    ruleset_attr = RulesetAttr(handled_access_fs=config.handled_access_fs,
-                               handled_access_network=config.handled_access_network)
+    ruleset_attr = RulesetAttr(
+        handled_access_fs=config.handled_access_fs if config.handled_access_fs else AccessFSSet(0),
+        handled_access_network=config.handled_access_network if config.handled_access_network else AccessNetSet(0))
     fd = syscall.create_ruleset(ruleset_attr, 0)
     for rule in rules:
         rule.add_to_rule_set(fd, config)
