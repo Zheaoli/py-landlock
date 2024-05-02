@@ -84,8 +84,8 @@ class Config:
 
 def get_config_from_abi_version(abi: ABIVersion) -> "Config":
     return Config(
-        handled_access_fs=abi.support_access_fs,
-        handled_access_network=abi.support_access_network,
+        handled_access_fs=AccessFSSet(abi.support_access_fs),
+        handled_access_network=AccessNetSet(abi.support_access_network),
         best_effort=False,
     )
 
